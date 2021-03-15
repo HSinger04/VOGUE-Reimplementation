@@ -128,7 +128,8 @@ def to_rgb(inp, style):
     # TODO
     print(upsample_to_size)
     print(int_im_size)
-    return Lambda(upsample_to_size, output_shape=[None, int_im_size, int_im_size, None])(x)
+    print(x)
+    return Lambda(upsample_to_size, output_shape=(None, int_im_size, int_im_size, None))(x)
 
 def from_rgb(inp, conc = None):
     fil = int(im_size * 4 / inp.shape[2])

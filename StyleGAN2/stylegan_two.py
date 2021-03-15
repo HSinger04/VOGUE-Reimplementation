@@ -124,10 +124,11 @@ def d_block(inp, fil, p = True):
 def to_rgb(inp, style):
     size = inp.shape[2]
     x = Conv2DMod(3, 1, kernel_initializer = VarianceScaling(200/size), demod = False)([inp, style])
+    int_im_size = tf.cast(im_size, dtype=int32)
     # TODO
     print(upsample_to_size)
     print(im_size)
-    return Lambda(upsample_to_size, output_shape=[None, im_size, im_size, None])(x)
+    return Lambda(upsample_to_size, output_shape=[None, int_im_size, int_im_size, None])(x)
 
 def from_rgb(inp, conc = None):
     fil = int(im_size * 4 / inp.shape[2])

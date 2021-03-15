@@ -127,7 +127,7 @@ def to_rgb(inp, style):
     int_im_size = tf.cast(im_size, dtype=tf.int32)
     # TODO
     print(upsample_to_size)
-    print(im_size)
+    print(int_im_size)
     return Lambda(upsample_to_size, output_shape=[None, int_im_size, int_im_size, None])(x)
 
 def from_rgb(inp, conc = None):

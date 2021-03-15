@@ -124,6 +124,9 @@ def d_block(inp, fil, p = True):
 def to_rgb(inp, style):
     size = inp.shape[2]
     x = Conv2DMod(3, 1, kernel_initializer = VarianceScaling(200/size), demod = False)([inp, style])
+    # TODO
+    print(upsample_to_size)
+    print(im_size)
     return Lambda(upsample_to_size, output_shape=[None, im_size, im_size, None])(x)
 
 def from_rgb(inp, conc = None):

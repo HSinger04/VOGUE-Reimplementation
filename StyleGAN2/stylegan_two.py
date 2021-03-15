@@ -16,9 +16,11 @@ import tensorflow.keras.backend as K
 from datagen import dataGenerator, printProgressBar
 from conv_mod import *
 
+# TODO: img_size
 im_size = 256
 latent_size = 512
 BATCH_SIZE = 16
+# TODO
 directory = "Earth"
 
 cha = 24
@@ -73,6 +75,7 @@ def upsample(x):
     return K.resize_images(x,2,2,"channels_last",interpolation='bilinear')
 
 def upsample_to_size(x):
+    # TODO: Don't tf.cast y to int
     y = im_size / x.shape[2]
     x = K.resize_images(x, y, y, "channels_last",interpolation='bilinear')
     return x

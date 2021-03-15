@@ -124,7 +124,7 @@ def d_block(inp, fil, p = True):
 def to_rgb(inp, style):
     size = inp.shape[2]
     x = Conv2DMod(3, 1, kernel_initializer = VarianceScaling(200/size), demod = False)([inp, style])
-    int_im_size = tf.cast(im_size, dtype=int32)
+    int_im_size = tf.cast(im_size, dtype=tf.int32)
     # TODO
     print(upsample_to_size)
     print(im_size)

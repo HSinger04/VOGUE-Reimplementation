@@ -355,8 +355,6 @@ class StyleGAN(object):
         self.GAN.GenModelA()
 
         self.GAN.G.summary()
-        # TODO: remove
-        self.GAN.summary()
         
         #Data generator (my own code, not from TF 2.0)
         self.im = dataGenerator(directory, im_size, flip = True)
@@ -501,7 +499,7 @@ class StyleGAN(object):
         trunc = np.ones([64, 1]) * trunc
         
         # TODO: remove
-        print(self.GAN.GM.name)
+        print(self.GAN.GM.summary())
         print(np.array(n1).shape)
         print(np.array(n2).shape)
         generated_images = self.GAN.GM.predict(n1 + [n2], batch_size = BATCH_SIZE)

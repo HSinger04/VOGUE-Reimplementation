@@ -438,8 +438,9 @@ class StyleGAN(object):
         printProgressBar(self.GAN.steps % 100, 99, decimals = 0)
 
         self.GAN.steps = self.GAN.steps + 1
-
-    @tf.function
+    
+    # TODO:
+    #@tf.function
     def train_step(self, images, style, noise, perform_gp = True, perform_pl = False):
 
         with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:

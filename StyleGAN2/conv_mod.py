@@ -90,7 +90,7 @@ class Conv2DMod(Layer):
         x = tf.nn.conv2d(x, w,
                 strides=self.strides,
                 padding="SAME",
-                data_format="NCHW")
+                data_format="NHWC")
 
         # Reshape/scale output.
         x = tf.reshape(x, [-1, self.filters, x.shape[2], x.shape[3]]) # Fused => reshape convolution groups back to minibatch.

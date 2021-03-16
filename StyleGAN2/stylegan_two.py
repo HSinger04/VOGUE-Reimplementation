@@ -355,7 +355,9 @@ class StyleGAN(object):
         self.GAN.GenModelA()
 
         self.GAN.G.summary()
-
+        # TODO: remove
+        self.GAN.summary()
+        
         #Data generator (my own code, not from TF 2.0)
         self.im = dataGenerator(directory, im_size, flip = True)
 

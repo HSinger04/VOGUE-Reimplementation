@@ -497,8 +497,10 @@ class StyleGAN(object):
         n1 = noiseList(64)
         n2 = nImage(64)
         trunc = np.ones([64, 1]) * trunc
-
-
+        
+        # TODO: remove
+        print(n1)
+        print(n2)
         generated_images = self.GAN.GM.predict(n1 + [n2], batch_size = BATCH_SIZE)
 
         r = []

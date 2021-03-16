@@ -86,12 +86,17 @@ class Conv2DMod(Layer):
         #Reshape/scale input
         x = tf.reshape(x, [1, -1, x.shape[2], x.shape[3]]) # Fused => reshape minibatch to convolution groups.
         w = tf.reshape(tf.transpose(weights, [1, 2, 3, 0, 4]), [weights.shape[1], weights.shape[2], weights.shape[3], -1])
-
+        
+        # TODO
+        x = tf.transpose(x, [0, 2, 3, 1])
+        
         x = tf.nn.conv2d(x, w,
                 strides=self.strides,
                 padding="SAME",
                 data_format="NHWC")
-
+        
+        x = tf.transpose(x, [0, 3, 1, 2])
+        
         # Reshape/scale output.
         x = tf.reshape(x, [-1, self.filters, x.shape[2], x.shape[3]]) # Fused => reshape convolution groups back to minibatch.
         x = tf.transpose(x, [0, 2, 3, 1])

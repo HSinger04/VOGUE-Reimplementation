@@ -95,7 +95,10 @@ def g_block(inp, istyle, inoise, fil, u = True):
     style = Dense(inp.shape[-1], kernel_initializer = 'he_uniform')(istyle)
     delta = Lambda(crop_to_fit)([inoise, out])
     d = Dense(fil, kernel_initializer = 'zeros')(delta)
-
+    
+    # TODO: remove
+    print(out.shape)
+    print(style.shape)
     out = Conv2DMod(filters = fil, kernel_size = 3, padding = 'same', kernel_initializer = 'he_uniform')([out, style])
     out = add([out, d])
     out = LeakyReLU(0.2)(out)

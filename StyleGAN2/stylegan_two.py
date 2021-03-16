@@ -89,8 +89,9 @@ def g_block(inp, istyle, inoise, fil, u = True):
         out = Lambda(upsample, output_shape=[None, inp.shape[2] * 2, inp.shape[2] * 2, None])(inp)
     else:
         out = Activation('linear')(inp)
-
-    rgb_style = Dense(fil, kernel_initializer = VarianceScaling(200/out.shape[2]))(istyle)
+    
+    scale = tf.math.divide(200, out.shape[2])
+    rgb_style = Dense(fil, kernel_initializer = VarianceScaling(scale))(istyle)
     style = Dense(inp.shape[-1], kernel_initializer = 'he_uniform')(istyle)
     delta = Lambda(crop_to_fit)([inoise, out])
     d = Dense(fil, kernel_initializer = 'zeros')(delta)

@@ -501,7 +501,6 @@ class StyleGAN(object):
         # TODO: remove
         print(np.array(n1).shape)
         print(np.array(n2).shape)
-        print(np.array(n1 + [n2]).shape)
         generated_images = self.GAN.GM.predict(n1 + [n2], batch_size = BATCH_SIZE)
 
         r = []

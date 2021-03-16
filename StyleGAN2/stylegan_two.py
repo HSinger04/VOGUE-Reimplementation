@@ -97,6 +97,7 @@ def g_block(inp, istyle, inoise, fil, u = True):
     d = Dense(fil, kernel_initializer = 'zeros')(delta)
     
     # TODO: remove
+    print("out and style print\n\n")
     print(out.shape)
     print(style.shape)
     out = Conv2DMod(filters = fil, kernel_size = 3, padding = 'same', kernel_initializer = 'he_uniform')([out, style])

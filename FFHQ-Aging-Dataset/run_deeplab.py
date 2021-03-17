@@ -82,8 +82,8 @@ def main():
 	# TODO: remove
         print(dataset.images[i].replace(imname,'parsings/'+imname[:-4]+'.png'))
         try:
-	    # TODO: remove
-	    print("enter try")
+            # TODO: remove
+            print("enter try")
             mask_pred.save(dataset.images[i].replace(imname,'parsings/'+imname[:-4]+'.png'))
         except FileNotFoundError:
 	    # TODO: remove 

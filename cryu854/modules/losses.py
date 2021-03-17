@@ -69,6 +69,9 @@ class ns_pathreg_r1:
                 pl_noise_applied = tf.reduce_sum(fake_images * pl_noise)
             pl_grads = pl_tape.gradient(pl_noise_applied, pl_w)
             # TODO: remove
+            print("\n" + "pl_labels: " + str(pl_labels) + "\n")
+            print("\n" + "pl_noise: " + str(pl_noise) + "\n")
+            print("\n" + "real_labels: " + str(real_labels) + "\n")
             print("\n" + "real_images: " + str(real_images) + "\n")
             print("\n" + "fake_images: " + str(fake_images) + "\n")
             print("\n" + "pl_grads: " + str(pl_grads) + "\n")

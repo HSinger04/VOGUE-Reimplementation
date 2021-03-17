@@ -80,7 +80,7 @@ def main():
         mask_pred = Image.fromarray(pred)
         mask_pred=mask_pred.resize((resolution,resolution), Image.NEAREST)
 	# TODO: remove
-	print(dataset.images[i].replace(imname,'parsings/'+imname[:-4]+'.png'))
+        print(dataset.images[i].replace(imname,'parsings/'+imname[:-4]+'.png'))
         try:
 	    # TODO: remove
 	    print("enter try")

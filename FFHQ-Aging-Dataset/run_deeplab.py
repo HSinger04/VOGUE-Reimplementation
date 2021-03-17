@@ -86,8 +86,8 @@ def main():
             print("enter try")
             mask_pred.save(dataset.images[i].replace(imname,'parsings/'+imname[:-4]+'.png'))
         except FileNotFoundError:
-	    # TODO: remove 
-	    print("enter except")  
+	    # TODO: remove
+            print("enter except")  
             os.makedirs(os.path.join(os.path.dirname(dataset.images[i]),'parsings'))
             mask_pred.save(dataset.images[i].replace(imname,'parsings/'+imname[:-4]+'.png'))
 

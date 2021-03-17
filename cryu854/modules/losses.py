@@ -66,12 +66,13 @@ class ns_pathreg_r1:
             if not self.num_labels == 0: 
                 labels_indice = tf.random.uniform([pl_batch], 0, self.num_labels, dtype=tf.int32)
             pl_labels = tf.one_hot(labels_indice, self.num_labels) if self.num_labels > 0 else tf.zeros([pl_batch, 0])
-            # TODO: Changed False to True and commented pl_tape out
-            with tf.GradientTape(watch_accessed_variables=True) as pl_tape:
+            # TODO: my work around: First only get pl_w and then get fake_image here
+            _, pl_w = self.G([pl_latents, pl_labels], return_latents=True, training=True)
+            with tf.GradientTape(watch_accessed_variables=False) as pl_tape:
                 #pl_tape.watch([pl_latents, pl_labels])
-                # TODO: my work around: First only get pl_w and then get fake_image here
+                pl_tape.watch(pl_w)
                 #fake_images, pl_w = self.G([pl_latents, pl_labels], return_latents=True, training=True)
-                _, pl_w = self.G([pl_latents, pl_labels], return_latents=True, training=True)
+                
                 fake_images = self.G.synthesis(pl_w)
                 # Compute |J*y|.
                 pl_noise = tf.random.normal(tf.shape(fake_images)) * self.pl_denorm

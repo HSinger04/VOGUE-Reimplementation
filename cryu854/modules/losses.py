@@ -61,7 +61,9 @@ class ns_pathreg_r1:
             # Evaluate the regularization term using a smaller minibatch to conserve memory.
             pl_batch = tf.maximum(1, self.batch_size // self.pl_batch_shrink)
             pl_latents = tf.random.normal([pl_batch, 512])
-            labels_indice = tf.random.uniform([pl_batch], 0, self.num_labels, dtype=tf.int32)
+            labels_indice = tf.zeros([pl_batch], dtype=tf.int32)
+            if not self.num_labels == 0: 
+                labels_indice = tf.random.uniform([pl_batch], 0, self.num_labels, dtype=tf.int32)
             pl_labels = tf.one_hot(labels_indice, self.num_labels) if self.num_labels > 0 else tf.zeros([pl_batch, 0])
             with tf.GradientTape(watch_accessed_variables=False) as pl_tape:
                 pl_tape.watch([pl_latents, pl_labels])

@@ -87,7 +87,8 @@ class Trainer:
 
     def create_dataset(self):
         """ Create dataset with one of 'ffhq'/'afhq'/'custom'."""
-        @tf.function
+        # TODO
+        #@tf.function
         def parse_file(file_name):
             image = tf.io.read_file(file_name)
             image = tf.image.decode_png(image, channels=3)
@@ -179,8 +180,8 @@ class Trainer:
         print(f'Total Time taken is {self.elapsed_time.numpy()} sec\n')
         self.ckpt_manager.save(checkpoint_number=self.step)
 
-
-    @tf.function
+    # TODO
+    #@tf.function
     def train_step(self, real_images, real_labels):
         """ Update D, G and setup Gs weights per train step. """
         self.step.assign_add(1)

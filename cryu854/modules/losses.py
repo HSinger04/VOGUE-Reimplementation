@@ -69,7 +69,10 @@ class ns_pathreg_r1:
             # TODO: Changed False to True and commented pl_tape out
             with tf.GradientTape(watch_accessed_variables=True) as pl_tape:
                 #pl_tape.watch([pl_latents, pl_labels])
-                fake_images, pl_w = self.G([pl_latents, pl_labels], return_latents=True, training=True)
+                # TODO: my work around: First only get pl_w and then get fake_image here
+                #fake_images, pl_w = self.G([pl_latents, pl_labels], return_latents=True, training=True)
+                pl_w = self.G([pl_latents, pl_labels], training=True)
+                fake_images = self.G.synthesis(pl_w)
                 # Compute |J*y|.
                 pl_noise = tf.random.normal(tf.shape(fake_images)) * self.pl_denorm
                 pl_noise_applied = tf.reduce_sum(fake_images * pl_noise)

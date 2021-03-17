@@ -69,6 +69,8 @@ class ns_pathreg_r1:
             with tf.GradientTape(watch_accessed_variables=False) as pl_tape:
                 pl_tape.watch([pl_latents, pl_labels])
                 fake_images, pl_w = self.G([pl_latents, pl_labels], return_latents=True, training=True)
+                # TODO
+                print("\n" + "gradient fake to pl_w: " + str(pl_tape.gradient(fake_images, pl_w).numpy()) + "\n")
                 # Compute |J*y|.
                 pl_noise = tf.random.normal(tf.shape(fake_images)) * self.pl_denorm
                 pl_noise_applied = tf.reduce_sum(fake_images * pl_noise)

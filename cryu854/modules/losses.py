@@ -66,8 +66,9 @@ class ns_pathreg_r1:
             if not self.num_labels == 0: 
                 labels_indice = tf.random.uniform([pl_batch], 0, self.num_labels, dtype=tf.int32)
             pl_labels = tf.one_hot(labels_indice, self.num_labels) if self.num_labels > 0 else tf.zeros([pl_batch, 0])
-            with tf.GradientTape(watch_accessed_variables=False) as pl_tape:
-                pl_tape.watch([pl_latents, pl_labels])
+            # TODO: Changed False to True and commented pl_tape out
+            with tf.GradientTape(watch_accessed_variables=True) as pl_tape:
+                #pl_tape.watch([pl_latents, pl_labels])
                 fake_images, pl_w = self.G([pl_latents, pl_labels], return_latents=True, training=True)
                 # TODO
                 print("\n" + "gradient fake to pl_w: " + str(pl_tape.gradient(fake_images, pl_w).numpy()) + "\n")

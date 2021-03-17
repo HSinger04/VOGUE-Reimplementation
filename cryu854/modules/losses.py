@@ -21,7 +21,8 @@ class ns_pathreg_r1:
 
     # R1 and R2 regularizers from the paper
     # "Which Training Methods for GANs do actually Converge?", Mescheder et al. 2018
-    @tf.function
+    # TODO
+    #@tf.function
     def get_D_loss(self, real_images, real_labels, compute_reg=False):
         latents = tf.random.normal([self.batch_size, 512])
         fake_images = self.G([latents, real_labels], training=True)
@@ -47,7 +48,8 @@ class ns_pathreg_r1:
 
     # Non-saturating logistic loss with path length regularizer from the paper
     # "Analyzing and Improving the Image Quality of StyleGAN", Karras et al. 2019
-    @tf.function
+    # TODO
+    #@tf.function
     def get_G_loss(self, real_images, real_labels, compute_reg=False):
         latents = tf.random.normal([self.batch_size, 512])
         fake_images = self.G([latents, real_labels], training=True)
@@ -115,8 +117,8 @@ class ns_DiffAugment_r1:
         self.policy = policy
         self.gamma = 0.0002 * (self.G.resolution ** 2) / self.batch_size # heuristic formula
 
-
-    @tf.function
+    # TODO
+    #@tf.function
     def get_D_loss(self, real_images, real_labels, compute_reg=False):
         latents = tf.random.normal([self.batch_size, 512])
         fake_images = self.G([latents, real_labels], training=True)
@@ -139,8 +141,8 @@ class ns_DiffAugment_r1:
 
         return loss, reg
 
-
-    @tf.function
+    # TODO
+    #@tf.function
     def get_G_loss(self, real_images, real_labels, compute_reg=False):
         latents = tf.random.normal([self.batch_size, 512])
         fake_images = self.G([latents, real_labels], training=True)

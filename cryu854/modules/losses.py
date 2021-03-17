@@ -134,9 +134,8 @@ class ns_DiffAugment_r1:
         loss = tf.reduce_mean(loss)
 
         return loss, reg
-
-    # TODO
-    #@tf.function
+    
+    @tf.function
     def get_G_loss(self, real_images, real_labels, compute_reg=False):
         latents = tf.random.normal([self.batch_size, 512])
         fake_images = self.G([latents, real_labels], training=True)

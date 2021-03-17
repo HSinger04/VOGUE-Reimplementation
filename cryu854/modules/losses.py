@@ -71,7 +71,7 @@ class ns_pathreg_r1:
                 #pl_tape.watch([pl_latents, pl_labels])
                 # TODO: my work around: First only get pl_w and then get fake_image here
                 #fake_images, pl_w = self.G([pl_latents, pl_labels], return_latents=True, training=True)
-                pl_w = self.G([pl_latents, pl_labels], training=True)
+                _, pl_w = self.G([pl_latents, pl_labels], return_latents=True, training=True)
                 fake_images = self.G.synthesis(pl_w)
                 # Compute |J*y|.
                 pl_noise = tf.random.normal(tf.shape(fake_images)) * self.pl_denorm

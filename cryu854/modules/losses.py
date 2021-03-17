@@ -21,8 +21,7 @@ class ns_pathreg_r1:
 
     # R1 and R2 regularizers from the paper
     # "Which Training Methods for GANs do actually Converge?", Mescheder et al. 2018
-    # TODO
-    #@tf.function
+    @tf.function
     def get_D_loss(self, real_images, real_labels, compute_reg=False):
         latents = tf.random.normal([self.batch_size, 512])
         fake_images = self.G([latents, real_labels], training=True)
@@ -48,8 +47,7 @@ class ns_pathreg_r1:
 
     # Non-saturating logistic loss with path length regularizer from the paper
     # "Analyzing and Improving the Image Quality of StyleGAN", Karras et al. 2019
-    # TODO
-    #@tf.function
+    @tf.function
     def get_G_loss(self, real_images, real_labels, compute_reg=False):
         latents = tf.random.normal([self.batch_size, 512])
         fake_images = self.G([latents, real_labels], training=True)
@@ -61,32 +59,21 @@ class ns_pathreg_r1:
             # Evaluate the regularization term using a smaller minibatch to conserve memory.
             pl_batch = tf.maximum(1, self.batch_size // self.pl_batch_shrink)
             pl_latents = tf.random.normal([pl_batch, 512])
-            # TODO: 
             labels_indice = tf.zeros([pl_batch], dtype=tf.int32)
+            # NOTE: created this if stuff myself
             if not self.num_labels == 0: 
                 labels_indice = tf.random.uniform([pl_batch], 0, self.num_labels, dtype=tf.int32)
             pl_labels = tf.one_hot(labels_indice, self.num_labels) if self.num_labels > 0 else tf.zeros([pl_batch, 0])
-            # TODO: my work around: First only get pl_w and then get fake_image here
+            # NOTE: my work around: First only get pl_w and then get fake_image here
             _, pl_w = self.G([pl_latents, pl_labels], return_latents=True, training=True)
             with tf.GradientTape(watch_accessed_variables=False) as pl_tape:
-                #pl_tape.watch([pl_latents, pl_labels])
                 pl_tape.watch(pl_w)
-                #fake_images, pl_w = self.G([pl_latents, pl_labels], return_latents=True, training=True)
                 
                 fake_images = self.G.synthesis(pl_w)
                 # Compute |J*y|.
                 pl_noise = tf.random.normal(tf.shape(fake_images)) * self.pl_denorm
                 pl_noise_applied = tf.reduce_sum(fake_images * pl_noise)
             pl_grads = pl_tape.gradient(pl_noise_applied, pl_w)
-            # TODO: remove
-            print("\n" + "pl_noise_applied: " + str(pl_noise_applied.numpy()) + "\n")
-            print("\n" + "pl_w: " + str(pl_w.numpy().shape) + "\n")
-            print("\n" + "pl_labels: " + str(pl_labels.numpy().shape) + "\n")
-            print("\n" + "pl_noise: " + str(pl_noise.numpy().shape) + "\n")
-            print("\n" + "real_labels: " + str(real_labels.numpy().shape) + "\n")
-            print("\n" + "real_images: " + str(real_images.numpy().shape) + "\n")
-            print("\n" + "fake_images: " + str(fake_images.numpy().shape) + "\n")
-            print("\n" + "pl_grads: " + str(pl_grads.numpy().shape) + "\n")
             pl_lengths = tf.math.sqrt(tf.reduce_mean(tf.reduce_sum(tf.square(pl_grads), axis=2), axis=1))
 
             # Track exponential moving average of |J*y|.
@@ -125,8 +112,7 @@ class ns_DiffAugment_r1:
         self.policy = policy
         self.gamma = 0.0002 * (self.G.resolution ** 2) / self.batch_size # heuristic formula
 
-    # TODO
-    #@tf.function
+    @tf.function
     def get_D_loss(self, real_images, real_labels, compute_reg=False):
         latents = tf.random.normal([self.batch_size, 512])
         fake_images = self.G([latents, real_labels], training=True)

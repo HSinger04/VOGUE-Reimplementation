@@ -68,6 +68,8 @@ class ns_pathreg_r1:
                 pl_noise = tf.random.normal(tf.shape(fake_images)) * self.pl_denorm
                 pl_noise_applied = tf.reduce_sum(fake_images * pl_noise)
             pl_grads = pl_tape.gradient(pl_noise_applied, pl_w)
+            # TODO: remove
+            print(pl_grads)
             pl_lengths = tf.math.sqrt(tf.reduce_mean(tf.reduce_sum(tf.square(pl_grads), axis=2), axis=1))
 
             # Track exponential moving average of |J*y|.

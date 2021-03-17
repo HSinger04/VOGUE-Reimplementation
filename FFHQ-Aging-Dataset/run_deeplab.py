@@ -79,9 +79,15 @@ def main():
         imname = os.path.basename(dataset.images[i])
         mask_pred = Image.fromarray(pred)
         mask_pred=mask_pred.resize((resolution,resolution), Image.NEAREST)
+	# TODO: remove
+	print(dataset.images[i].replace(imname,'parsings/'+imname[:-4]+'.png')
         try:
+	    # TODO: remove
+	    print("enter try")
             mask_pred.save(dataset.images[i].replace(imname,'parsings/'+imname[:-4]+'.png'))
         except FileNotFoundError:
+	    # TODO: remove 
+	    print("enter except")  
             os.makedirs(os.path.join(os.path.dirname(dataset.images[i]),'parsings'))
             mask_pred.save(dataset.images[i].replace(imname,'parsings/'+imname[:-4]+'.png'))
 

@@ -73,14 +73,14 @@ class ns_pathreg_r1:
                 pl_noise_applied = tf.reduce_sum(fake_images * pl_noise)
             pl_grads = pl_tape.gradient(pl_noise_applied, pl_w)
             # TODO: remove
-            print("\n" + "pl_noise_applied: " + str(pl_noise_applied.numpy()) + "\n")
-            print("\n" + "pl_w: " + str(pl_w.numpy()) + "\n")
-            print("\n" + "pl_labels: " + str(pl_labels.numpy()) + "\n")
-            print("\n" + "pl_noise: " + str(pl_noise.numpy()) + "\n")
-            print("\n" + "real_labels: " + str(real_labels.numpy()) + "\n")
-            print("\n" + "real_images: " + str(real_images.numpy()) + "\n")
-            print("\n" + "fake_images: " + str(fake_images.numpy()) + "\n")
-            print("\n" + "pl_grads: " + str(pl_grads.numpy()) + "\n")
+            print("\n" + "pl_noise_applied: " + str(pl_noise_applied.numpy().shape) + "\n")
+            print("\n" + "pl_w: " + str(pl_w.numpy().shape) + "\n")
+            print("\n" + "pl_labels: " + str(pl_labels.numpy().shape) + "\n")
+            print("\n" + "pl_noise: " + str(pl_noise.numpy().shape) + "\n")
+            print("\n" + "real_labels: " + str(real_labels.numpy().shape) + "\n")
+            print("\n" + "real_images: " + str(real_images.numpy().shape) + "\n")
+            print("\n" + "fake_images: " + str(fake_images.numpy().shape) + "\n")
+            print("\n" + "pl_grads: " + str(pl_grads.numpy().shape) + "\n")
             pl_lengths = tf.math.sqrt(tf.reduce_mean(tf.reduce_sum(tf.square(pl_grads), axis=2), axis=1))
 
             # Track exponential moving average of |J*y|.

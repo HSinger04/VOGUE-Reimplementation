@@ -142,7 +142,7 @@ class generator(Model):
         return Model(inputs=[latents_in, labels_in], outputs=[latents_out], name=name)
 
 
-    def g_synthesis(self, randomize_noise, config, impl, name='g_synthesis'):
+    def g_synthesis(self, randomize_noise, config, impl, name='g_synthesis', all_styles=False):
         """ Synthesis network with skip architecture. """
         filter_multiplier = 2 if config == 'f' else 1
         filters = {4: 512,
@@ -157,6 +157,8 @@ class generator(Model):
 
         latents_in = Input(shape=(self.num_layers, 512), name='latents_in')
         w_latents = latents_in
+        
+        style_array = tf.TensorArray(tf.float32, size=len(filters))
 
         constant = get_constant(name='constant')(w_latents)
         x = gen_block(filters=512, randomize_noise=randomize_noise, impl=impl, name='4x4')([constant, w_latents[:, 0]])
@@ -166,9 +168,16 @@ class generator(Model):
             x = gen_block(filters=fmaps, randomize_noise=randomize_noise, impl=impl, name=f'{res}x{res}')([x, w_latents[:, index*2+2]])
             y = Lambda(lambda x: upsample_2d(x, k=[1,3,3,1], data_format='NHWC', impl=impl), name=f'{res}x{res}_img_up')(y)
             y += modulated_conv2d(filters=3, kernel_size=1, demodulate=False, impl=impl, name=f'{res}x{res}_ToRGB')([x, w_latents[:, index*2+3]])
-        
+            
+            # NOTE: Added by us
+            if all_styles:
+                style_array.write(index, y)    
+            
         images_out = y
-        return Model(inputs=[latents_in], outputs=[images_out], name=name)
+        if all_styles:
+            return Model(inputs=[latents_in], outputs=style_array, name=name)
+        else:
+            return Model(inputs=[latents_in], outputs=[images_out], name=name)
 
 
     def setup_as_moving_average_of(self, src_net, beta=0.99, beta_nontrainable=0.0):

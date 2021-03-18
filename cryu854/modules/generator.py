@@ -215,7 +215,7 @@ class generator(Model):
         return truncated_w
 
     @tf.function
-    def call(self, inputs, truncation_psi=0.5, return_latents=False, training=None):
+    def call(self, inputs, truncation_psi=0.5, return_latents=False, training=None, all_styles=False):
         latents_in, labels_in = inputs
 
         w_latents = self.mapping([latents_in, labels_in])
@@ -225,7 +225,7 @@ class generator(Model):
         else:
             w_latents = self.truncation_trick(w_latents, truncation_psi)
 
-        images_out = self.synthesis(w_latents)
+        images_out = self.synthesis(w_latents, all_styles=all_styles)
         if return_latents:
             return images_out, w_latents
         return images_out

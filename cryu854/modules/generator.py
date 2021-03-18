@@ -176,8 +176,7 @@ class generator(Model):
         images_out = y
         if all_styles:
             return Model(inputs=[latents_in], outputs=style_array, name=name)
-        else:
-            return Model(inputs=[latents_in], outputs=[images_out], name=name)
+        return Model(inputs=[latents_in], outputs=[images_out], name=name)
 
 
     def setup_as_moving_average_of(self, src_net, beta=0.99, beta_nontrainable=0.0):
@@ -215,7 +214,7 @@ class generator(Model):
         return truncated_w
 
     @tf.function
-    def call(self, inputs, truncation_psi=0.5, return_latents=False, training=None, all_styles=False):
+    def call(self, inputs, truncation_psi=0.5, return_latents=False, training=Non):
         latents_in, labels_in = inputs
 
         w_latents = self.mapping([latents_in, labels_in])

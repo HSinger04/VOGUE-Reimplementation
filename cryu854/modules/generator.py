@@ -142,7 +142,7 @@ class generator(Model):
         return Model(inputs=[latents_in, labels_in], outputs=[latents_out], name=name)
 
 
-    def g_synthesis(self, randomize_noise, config, impl, name='g_synthesis', all_styles=False):
+    def g_synthesis(self, randomize_noise, config, impl, name='g_synthesis'):
         """ Synthesis network with skip architecture. """
         filter_multiplier = 2 if config == 'f' else 1
         filters = {4: 512,
@@ -170,12 +170,12 @@ class generator(Model):
             y += modulated_conv2d(filters=3, kernel_size=1, demodulate=False, impl=impl, name=f'{res}x{res}_ToRGB')([x, w_latents[:, index*2+3]])
             
             # NOTE: Added by us
-            if all_styles:
-                style_array.write(index, y)    
+            #if all_styles:
+            #    style_array.write(index, y)    
             
         images_out = y
-        if all_styles:
-            return Model(inputs=[latents_in], outputs=style_array, name=name)
+        #if all_styles:
+        #    return Model(inputs=[latents_in], outputs=style_array, name=name)
         return Model(inputs=[latents_in], outputs=[images_out], name=name)
 
 
@@ -214,7 +214,7 @@ class generator(Model):
         return truncated_w
 
     @tf.function
-    def call(self, inputs, truncation_psi=0.5, return_latents=False, training=Non):
+    def call(self, inputs, truncation_psi=0.5, return_latents=False, training=None):
         latents_in, labels_in = inputs
 
         w_latents = self.mapping([latents_in, labels_in])
@@ -224,7 +224,7 @@ class generator(Model):
         else:
             w_latents = self.truncation_trick(w_latents, truncation_psi)
 
-        images_out = self.synthesis(w_latents, all_styles=all_styles)
+        images_out = self.synthesis(w_latents)
         if return_latents:
             return images_out, w_latents
         return images_out

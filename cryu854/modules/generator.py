@@ -169,9 +169,9 @@ class generator(Model):
             y = Lambda(lambda x: upsample_2d(x, k=[1,3,3,1], data_format='NHWC', impl=impl), name=f'{res}x{res}_img_up')(y)
             y += modulated_conv2d(filters=3, kernel_size=1, demodulate=False, impl=impl, name=f'{res}x{res}_ToRGB')([x, w_latents[:, index*2+3]])
             
-            # NOTE: Added by us
-            #if all_styles:
-            #    style_array.write(index, y)    
+            # TODO:
+            if index == 6:
+                break
             
         images_out = y
         #if all_styles:

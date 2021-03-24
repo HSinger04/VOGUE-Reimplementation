@@ -152,8 +152,10 @@ class generator(Model):
                    64: 256 * filter_multiplier,
                    128: 128 * filter_multiplier,
                    256: 64 * filter_multiplier,
-                   512: 32 * filter_multiplier,
-                   1024: 16 * filter_multiplier}
+                   # TODO
+                  # 512: 32 * filter_multiplier,
+                  # 1024: 16 * filter_multiplier
+                  }
 
         latents_in = Input(shape=(self.num_layers, 512), name='latents_in')
         w_latents = latents_in
@@ -168,11 +170,7 @@ class generator(Model):
             x = gen_block(filters=fmaps, randomize_noise=randomize_noise, impl=impl, name=f'{res}x{res}')([x, w_latents[:, index*2+2]])
             y = Lambda(lambda x: upsample_2d(x, k=[1,3,3,1], data_format='NHWC', impl=impl), name=f'{res}x{res}_img_up')(y)
             y += modulated_conv2d(filters=3, kernel_size=1, demodulate=False, impl=impl, name=f'{res}x{res}_ToRGB')([x, w_latents[:, index*2+3]])
-            
-            # TODO:
-            if index == 6:
-                break
-            
+             
         images_out = y
         #if all_styles:
         #    return Model(inputs=[latents_in], outputs=style_array, name=name)

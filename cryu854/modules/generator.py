@@ -152,9 +152,8 @@ class generator(Model):
                    64: 256 * filter_multiplier,
                    128: 128 * filter_multiplier,
                    256: 64 * filter_multiplier,
-                   # TODO
-                  # 512: 32 * filter_multiplier,
-                  # 1024: 16 * filter_multiplier
+                   512: 32 * filter_multiplier,
+                   1024: 16 * filter_multiplier
                   }
 
         latents_in = Input(shape=(self.num_layers, 512), name='latents_in')

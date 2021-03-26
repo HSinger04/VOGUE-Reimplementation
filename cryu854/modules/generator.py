@@ -233,7 +233,7 @@ class generator(Model):
         else:
             w_latents = self.truncation_trick(w_latents, truncation_psi)
         
-        #print(w_latents.shape)
+        print(w_latents.shape)
         images_out = self.g_synthesis_test(w_latents)
         if return_latents:
             return images_out, w_latents
@@ -257,8 +257,9 @@ class generator(Model):
 
         latents_in = Input(shape=(self.num_layers, 512), name='latents_in')
         w_latents = latents_in
+        print("yay")
+        print(w_latents.shape)
         print(w_latents[:, 0].shape)
-#        print("yay")
             
         constant = get_constant(name='constant')(w_latents)
         x = gen_block(filters=512, randomize_noise=randomize_noise, impl=impl, name='4x4')([constant, w_latents[:, 0]])

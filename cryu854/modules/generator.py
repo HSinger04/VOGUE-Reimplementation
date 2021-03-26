@@ -258,7 +258,8 @@ class generator(Model):
         latents_in = Input(shape=(self.num_layers, 512), name='latents_in')
         w_latents = latents_in
         print(w_latents[:, 0].shape)
-
+        print("yay")
+            
         constant = get_constant(name='constant')(w_latents)
         x = gen_block(filters=512, randomize_noise=randomize_noise, impl=impl, name='4x4')([constant, w_latents[:, 0]])
         y = modulated_conv2d(filters=3, kernel_size=1, demodulate=False, impl=impl, name='4x4_ToRGB')([x, w_latents[:, 1]])

@@ -222,3 +222,19 @@ class generator(Model):
         if return_latents:
             return images_out, w_latents
         return images_out
+    
+    def call_test(self, inputs, truncation_psi=0.5, return_latents=False, training=None):
+        latents_in, labels_in = inputs
+
+        w_latents = self.mapping([latents_in, labels_in])
+        if training:
+            self.update_moving_average(w_latents)
+            w_latents = self.style_mixing_regularization(latents_in, labels_in, w_latents)
+        else:
+            w_latents = self.truncation_trick(w_latents, truncation_psi)
+        
+        print(w_latents.shape)
+        images_out = self.synthesis(w_latents)
+        if return_latents:
+            return images_out, w_latents
+        return images_out

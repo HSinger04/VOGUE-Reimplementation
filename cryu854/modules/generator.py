@@ -233,7 +233,7 @@ class generator(Model):
         else:
             w_latents = self.truncation_trick(w_latents, truncation_psi)
         
-        print(w_latents.shape)
+        #print(w_latents.shape)
         images_out = self.g_synthesis_test(w_latents)
         if return_latents:
             return images_out, w_latents

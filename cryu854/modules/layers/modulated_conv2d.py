@@ -25,6 +25,7 @@ class modulated_conv2d(tf.keras.layers.Layer):
         self.fused_modconv = fused_modconv
         self.lr_mul = lr_mul
         self.impl = impl
+        self.p = 
 
     def build(self, input_shape):
         x_shape, w_latents_shape = input_shape  # x_shape = [batch_size, height, width, channels]
@@ -32,6 +33,9 @@ class modulated_conv2d(tf.keras.layers.Layer):
         init_std, self.runtime_coef = get_runtime_coef(self.lr_mul, weight_shape)    
 
         self.fully_connected = fully_connected(units=x_shape[-1], apply_lrelu=False, name='modulate')
+        
+        # TODO: Check if it works without a bug + if it outputs the correct shape
+        self.p = tf.Variable(tf.keras.initializers.glorot_uniform(x_shape[-1]))
 
         self.w = self.add_weight(name='w',
                                  shape=weight_shape,
@@ -56,6 +60,73 @@ class modulated_conv2d(tf.keras.layers.Layer):
 
         # Modulate.
         s = self.fully_connected(w_latents) + 1
+        ww *= tf.cast(s[:, tf.newaxis, tf.newaxis, :, tf.newaxis], w.dtype) # [BkkIO] Scale input feature maps.
+
+        # Demodulate.
+        if self.demodulate:
+            d = tf.math.rsqrt(tf.reduce_sum(tf.square(ww), axis=[1,2,3]) + 1e-8) # [BO] Scaling factor.
+            ww *= d[:, tf.newaxis, tf.newaxis, tf.newaxis, :] # [BkkIO] Scale output feature maps.
+
+        # Reshape/scale input.
+        if self.fused_modconv:
+            x = tf.reshape(x, [1, -1, x.shape[2], x.shape[3]]) # Fused => reshape minibatch to convolution groups.
+            w = tf.reshape(tf.transpose(ww, [1, 2, 3, 0, 4]), [ww.shape[1], ww.shape[2], ww.shape[3], -1])
+        else:
+            x *= tf.cast(s[:, :, tf.newaxis, tf.newaxis], x.dtype) # [BIhw] Not fused => scale input activations.
+
+        # Convolution with optional up/downsampling.
+        if self.up:
+            x = upsample_conv_2d(x, tf.cast(w, x.dtype), data_format='NCHW', k=[1,3,3,1], impl=self.impl)
+        else:
+            x = tf.nn.conv2d(x, tf.cast(w, x.dtype), data_format='NCHW', strides=[1,1,1,1], padding='SAME')
+
+        # Reshape/scale output.
+        if self.fused_modconv:
+            x = tf.reshape(x, [-1, self.filters, x.shape[2], x.shape[3]]) # Fused => reshape convolution groups back to minibatch.
+        elif self.demodulate:
+            x *= tf.cast(d[:, :, tf.newaxis, tf.newaxis], x.dtype) # [BOhw] Not fused => scale output activations.
+        
+        # Transform back to channel last
+        x = tf.transpose(x, [0, 2, 3, 1])
+
+        if self.apply_bias:
+            b = self.b * self.lr_mul
+            x = tf.nn.bias_add(x, b)
+
+        return x
+    
+    def try_on(self, inputs, training):
+        # w_latents_global is the latent for the entity to which the local information gets added to,
+        # w_latents_local is the latent for the entity from which the local information gets taken from.
+        x, w_latents_global, w_latents_local = inputs
+        
+        # For w_latents_global:
+        
+        # Transform to channel first.
+        x = tf.transpose(x, [0, 3, 1, 2])
+
+        # Equalized learning rate and custom learning rate multiplier.
+        w = self.w * self.runtime_coef
+        ww = w[tf.newaxis] # [BkkIO] Introduce minibatch dimension.
+        
+        # Try-on part
+        
+        # get Q
+        q = tf.keras.activations.sigmoid(self.p)
+        Q = tf.linalg.diag(q)
+        print("Start printing")
+        print(q.shape)
+        print(Q.shape)
+        
+        # Get sigma_p and sigma_q
+        sigma_p = self.fully_connected(w_latents_global) + 1
+        sigma_g = self.fully_connected(w_latents_local) + 1
+        print(sigma_g.shape)
+        
+        # TODO: refactor to sigma_t instead of s
+        s = sigma_p + tf.linalg.matmul(Q, sigma_g - sigma_p)
+        print(s.shape)
+        
         ww *= tf.cast(s[:, tf.newaxis, tf.newaxis, :, tf.newaxis], w.dtype) # [BkkIO] Scale input feature maps.
 
         # Demodulate.

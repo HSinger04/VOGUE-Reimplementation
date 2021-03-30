@@ -34,7 +34,7 @@ class modulated_conv2d(tf.keras.layers.Layer):
         self.fully_connected = fully_connected(units=x_shape[-1], apply_lrelu=False, name='modulate')
         
         # TODO: Check if it works without a bug + if it outputs the correct shape
-        init_val = tf.keras.initializers.glorot_uniform(shape=x_shape[-1])
+        init_val = tf.keras.initializers.GlorotUniform()(shape=x_shape[-1])
         self.p = tf.Variable(initial_value=init_val)
 
         self.w = self.add_weight(name='w',

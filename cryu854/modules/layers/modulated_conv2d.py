@@ -25,6 +25,11 @@ class modulated_conv2d(tf.keras.layers.Layer):
         self.fused_modconv = fused_modconv
         self.lr_mul = lr_mul
         self.impl = impl
+        
+        # Try-on: p is basically our Q
+        # TODO: Check if it works without a bug + if it outputs the correct shape
+        init_val = tf.keras.initializers.GlorotUniform()(shape=x_shape[-1])
+        self.p = tf.Variable(initial_value=init_val)
 
     def build(self, input_shape):
         x_shape, w_latents_shape = input_shape  # x_shape = [batch_size, height, width, channels]
@@ -32,10 +37,6 @@ class modulated_conv2d(tf.keras.layers.Layer):
         init_std, self.runtime_coef = get_runtime_coef(self.lr_mul, weight_shape)    
 
         self.fully_connected = fully_connected(units=x_shape[-1], apply_lrelu=False, name='modulate')
-        
-        # TODO: Check if it works without a bug + if it outputs the correct shape
-        init_val = tf.keras.initializers.GlorotUniform()(shape=x_shape[-1])
-        self.p = tf.Variable(initial_value=init_val)
 
         self.w = self.add_weight(name='w',
                                  shape=weight_shape,

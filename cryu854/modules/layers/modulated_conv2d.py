@@ -25,7 +25,6 @@ class modulated_conv2d(tf.keras.layers.Layer):
         self.fused_modconv = fused_modconv
         self.lr_mul = lr_mul
         self.impl = impl
-        self.p = 
 
     def build(self, input_shape):
         x_shape, w_latents_shape = input_shape  # x_shape = [batch_size, height, width, channels]

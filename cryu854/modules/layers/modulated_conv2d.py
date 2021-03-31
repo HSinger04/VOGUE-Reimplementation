@@ -44,7 +44,14 @@ class modulated_conv2d(tf.keras.layers.Layer):
                                      dtype=tf.float32,
                                      initializer=tf.zeros_initializer(),
                                      trainable=True)
-
+        
+        # Try-On
+        self.p = self.add_weight(name='p',
+                                 shape=x_shape[-1],
+                                 dtype=tf.float32,
+                                 initializer=tf.tf.keras.initializers.GlorotUniform()(shape=x_shape[-1]),
+                                 trainable=True)
+        
     def call(self, inputs, training=None):
         x, w_latents = inputs
         # Transform to channel first.

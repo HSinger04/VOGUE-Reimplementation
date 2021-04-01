@@ -80,16 +80,20 @@ class gen_block(Layer):
         self.noise_injection = noise_injection(randomize_noise)
         self.scaled_lrelu = scaled_lrelu(alpha=0.2)
 
-    def call(self, inputs, training=None, try_on=False):
-        x = inputs[0]
-        if try_on:
-            x = self.modulated_conv2d.try_on(inputs)
-        else:    
-            x = self.modulated_conv2d(inputs)
+    def call(self, inputs, training=None):
+        x, w_latents = inputs
+        x = self.modulated_conv2d([x, w_latents])
         x = self.noise_injection(x)
         x = self.scaled_lrelu(x)
         return x
-
+        
+    def try_on(self, inputs, training=None, try_on=False):
+        x, w_latents_p, w_latents_g = inputs[0]
+        x = self.modulated_conv2d.try_on(inputs)
+        x = self.noise_injection(x)
+        x = self.scaled_lrelu(x)
+        return x
+   
 
 #----------------------------------------------------------------------------
 
@@ -198,11 +202,11 @@ class generator(Model):
     
         # This part stays unchanged as constant doesn't depend on input
         constant = get_constant(name='constant')(w_latents_p)
-        x = gen_block(filters=512, randomize_noise=randomize_noise, impl=impl, name='4x4')([constant, w_latents_p[:, 0], w_latents_g[:, 0]], try_on=True)
+        x = gen_block.try_on(filters=512, randomize_noise=randomize_noise, impl=impl, name='4x4')([constant, w_latents_p[:, 0], w_latents_g[:, 0]], try_on=True)
         y = modulated_conv2d(filters=3, kernel_size=1, demodulate=False, impl=impl, name='4x4_ToRGB').try_on([x, w_latents_p[:, 1], w_latents_g[:, 1]])
         for index, (res, fmaps) in enumerate(list(filters.items())[1:self.res_log2-1]):
-            x = gen_block(filters=fmaps, randomize_noise=randomize_noise, up=True, impl=impl, name=f'{res}x{res}_up')([x, w_latents_p[:, index*2+1], w_latents_g[:, index*2+1]], try_on=True)
-            x = gen_block(filters=fmaps, randomize_noise=randomize_noise, impl=impl, name=f'{res}x{res}')([x, w_latents_p[:, index*2+2], w_latents_g[:, index*2+2]], try_on=True)
+            x = gen_block.try_on(filters=fmaps, randomize_noise=randomize_noise, up=True, impl=impl, name=f'{res}x{res}_up')([x, w_latents_p[:, index*2+1], w_latents_g[:, index*2+1]], try_on=True)
+            x = gen_block.try_on(filters=fmaps, randomize_noise=randomize_noise, impl=impl, name=f'{res}x{res}')([x, w_latents_p[:, index*2+2], w_latents_g[:, index*2+2]], try_on=True)
             y = Lambda(lambda x: upsample_2d(x, k=[1,3,3,1], data_format='NHWC', impl=impl), name=f'{res}x{res}_img_up')(y)
             y += modulated_conv2d(filters=3, kernel_size=1, demodulate=False, impl=impl, name=f'{res}x{res}_ToRGB').try_on([x, w_latents_p[:, index*2+3], w_latents_g[:, index*2+3]])
              

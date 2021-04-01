@@ -222,3 +222,24 @@ class generator(Model):
         if return_latents:
             return images_out, w_latents
         return images_out
+    
+    @tf.function
+    def try_on(self, inputs, truncation_psi=0.5, return_latents=False, training=None):
+        latents_p, latents_g, labels_in = inputs
+
+        w_latents_p = self.mapping([latents_p, labels_in])
+        w_latents_g = self.mapping([latents_g, labels_in])
+        
+        # don't change this block as we will always use StyleGAN2 in training=False anyway.
+        if training:
+            self.update_moving_average(w_latents)
+            w_latents = self.style_mixing_regularization(latents_in, labels_in, w_latents)
+        else:
+            w_latents_p = self.truncation_trick(w_latents_p, truncation_psi)
+            w_latents_g = self.truncation_trick(w_latents_g, truncation_psi)
+        
+        # TODO: self.synthesis needs to be changed and w_latents isn't the input anymore.
+        images_out = self.synthesis(w_latents)
+        if return_latents:
+            return images_out, w_latents_p, w_latents_g
+        return images_out

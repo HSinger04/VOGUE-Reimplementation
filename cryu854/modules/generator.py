@@ -88,8 +88,8 @@ class gen_block(Layer):
         return x
         
     def try_on(self, inputs, training=None, try_on=False):
-        x, w_latents_p, w_latents_g = inputs[0]
-        x = self.modulated_conv2d.try_on(inputs)
+        x, w_latents_p, w_latents_g = inputs
+        x = self.modulated_conv2d.try_on([x, w_latents_p, w_latents_g])
         x = self.noise_injection(x)
         x = self.scaled_lrelu(x)
         return x

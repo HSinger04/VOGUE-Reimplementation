@@ -103,7 +103,7 @@ class modulated_conv2d(tf.keras.layers.Layer):
         
         # TODO: Probably need to batch like w_latents_p
         # get Q
-        q = tf.keras.activations.sigmoid(p)
+        q = tf.keras.activations.sigmoid(self.p)
         Q = tf.linalg.diag(q)
         
         # get sigmas

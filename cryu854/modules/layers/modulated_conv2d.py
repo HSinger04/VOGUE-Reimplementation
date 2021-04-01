@@ -46,11 +46,11 @@ class modulated_conv2d(tf.keras.layers.Layer):
                                      trainable=True)
         
         # Try-On
-        self.p = self.add_weight(name='p',
-                                 shape=x_shape[-1],
-                                 dtype=tf.float32,
-                                 initializer=tf.keras.initializers.GlorotUniform(),
-                                 trainable=True)
+        #self.p = self.add_weight(name='p',
+        #                         shape=x_shape[-1],
+        #                         dtype=tf.float32,
+        #                         initializer=tf.keras.initializers.GlorotUniform(),
+        #                         trainable=True)
         
     def call(self, inputs, training=None):
         x, w_latents = inputs

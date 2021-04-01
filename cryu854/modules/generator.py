@@ -81,11 +81,11 @@ class gen_block(Layer):
         self.scaled_lrelu = scaled_lrelu(alpha=0.2)
 
     def call(self, inputs, training=None, try_on=False):
-        x, w_latents = inputs
+        x = inputs[0]
         if try_on:
             x = self.modulated_conv2d.try_on(inputs)
         else:    
-            x = self.modulated_conv2d([x, w_latents])
+            x = self.modulated_conv2d(inputs)
         x = self.noise_injection(x)
         x = self.scaled_lrelu(x)
         return x

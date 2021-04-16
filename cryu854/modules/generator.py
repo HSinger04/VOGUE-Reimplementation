@@ -87,12 +87,12 @@ class gen_block(Layer):
         x = self.scaled_lrelu(x)
         return x
         
-    def try_on(self, inputs, training=None):
-        x, w_latents_p, w_latents_g = inputs
-        x = self.modulated_conv2d.try_on([x, w_latents_p, w_latents_g])
-        x = self.noise_injection(x)
-        x = self.scaled_lrelu(x)
-        return x
+    # def try_on(self, inputs, training=None):
+    #     x, w_latents_p, w_latents_g = inputs
+    #     x = self.modulated_conv2d.try_on([x, w_latents_p, w_latents_g])
+    #     x = self.noise_injection(x)
+    #     x = self.scaled_lrelu(x)
+    #     return x
    
 
 #----------------------------------------------------------------------------
@@ -181,38 +181,38 @@ class generator(Model):
         return Model(inputs=[latents_in], outputs=[images_out], name=name)
 
     
-    def g_synthesis_try_on(self, randomize_noise, config, impl, name='g_synthesis_try_on'):
-        """ Synthesis network with skip architecture. """
-        filter_multiplier = 2 if config == 'f' else 1
-        filters = {4: 512,
-                   8: 512,
-                   16: 512,
-                   32: 512,
-                   64: 256 * filter_multiplier,
-                   128: 128 * filter_multiplier,
-                   256: 64 * filter_multiplier,
-                   512: 32 * filter_multiplier,
-                   1024: 16 * filter_multiplier
-                  }
-
-        latents_in = Input(shape=(self.num_layers, 512), name='latents_in')
-        latents_g = Input(shape=(self.num_layers, 512), name='latents_g')
-        w_latents_p = latents_in
-        w_latents_g = latents_g
-    
-        # This part stays unchanged as constant doesn't depend on input
-        constant = get_constant(name='constant')(w_latents_p)
-        x = gen_block.try_on(filters=512, randomize_noise=randomize_noise, impl=impl, name='4x4')([constant, w_latents_p[:, 0], w_latents_g[:, 0]])
-        y = modulated_conv2d(filters=3, kernel_size=1, demodulate=False, impl=impl, name='4x4_ToRGB').try_on([x, w_latents_p[:, 1], w_latents_g[:, 1]])
-        for index, (res, fmaps) in enumerate(list(filters.items())[1:self.res_log2-1]):
-            x = gen_block.try_on(filters=fmaps, randomize_noise=randomize_noise, up=True, impl=impl, name=f'{res}x{res}_up')([x, w_latents_p[:, index*2+1], w_latents_g[:, index*2+1]])
-            x = gen_block.try_on(filters=fmaps, randomize_noise=randomize_noise, impl=impl, name=f'{res}x{res}')([x, w_latents_p[:, index*2+2], w_latents_g[:, index*2+2]])
-            y = Lambda(lambda x: upsample_2d(x, k=[1,3,3,1], data_format='NHWC', impl=impl), name=f'{res}x{res}_img_up')(y)
-            y += modulated_conv2d(filters=3, kernel_size=1, demodulate=False, impl=impl, name=f'{res}x{res}_ToRGB').try_on([x, w_latents_p[:, index*2+3], w_latents_g[:, index*2+3]])
-             
-        images_out = y
-        
-        return Model(inputs=[latents_in, latents_g], outputs=[images_out], name=name)
+    # def g_synthesis_try_on(self, randomize_noise, config, impl, name='g_synthesis_try_on'):
+    #     """ Synthesis network with skip architecture. """
+    #     filter_multiplier = 2 if config == 'f' else 1
+    #     filters = {4: 512,
+    #                8: 512,
+    #                16: 512,
+    #                32: 512,
+    #                64: 256 * filter_multiplier,
+    #                128: 128 * filter_multiplier,
+    #                256: 64 * filter_multiplier,
+    #                512: 32 * filter_multiplier,
+    #                1024: 16 * filter_multiplier
+    #               }
+    #
+    #     latents_in = Input(shape=(self.num_layers, 512), name='latents_in')
+    #     latents_g = Input(shape=(self.num_layers, 512), name='latents_g')
+    #     w_latents_p = latents_in
+    #     w_latents_g = latents_g
+    #
+    #     # This part stays unchanged as constant doesn't depend on input
+    #     constant = get_constant(name='constant')(w_latents_p)
+    #     x = gen_block.try_on(filters=512, randomize_noise=randomize_noise, impl=impl, name='4x4')([constant, w_latents_p[:, 0], w_latents_g[:, 0]])
+    #     y = modulated_conv2d(filters=3, kernel_size=1, demodulate=False, impl=impl, name='4x4_ToRGB').try_on([x, w_latents_p[:, 1], w_latents_g[:, 1]])
+    #     for index, (res, fmaps) in enumerate(list(filters.items())[1:self.res_log2-1]):
+    #         x = gen_block.try_on(filters=fmaps, randomize_noise=randomize_noise, up=True, impl=impl, name=f'{res}x{res}_up')([x, w_latents_p[:, index*2+1], w_latents_g[:, index*2+1]])
+    #         x = gen_block.try_on(filters=fmaps, randomize_noise=randomize_noise, impl=impl, name=f'{res}x{res}')([x, w_latents_p[:, index*2+2], w_latents_g[:, index*2+2]])
+    #         y = Lambda(lambda x: upsample_2d(x, k=[1,3,3,1], data_format='NHWC', impl=impl), name=f'{res}x{res}_img_up')(y)
+    #         y += modulated_conv2d(filters=3, kernel_size=1, demodulate=False, impl=impl, name=f'{res}x{res}_ToRGB').try_on([x, w_latents_p[:, index*2+3], w_latents_g[:, index*2+3]])
+    #
+    #     images_out = y
+    #
+    #     return Model(inputs=[latents_in, latents_g], outputs=[images_out], name=name)
 
 
     def setup_as_moving_average_of(self, src_net, beta=0.99, beta_nontrainable=0.0):
@@ -265,23 +265,23 @@ class generator(Model):
             return images_out, w_latents
         return images_out
     
-    @tf.function
-    def try_on(self, inputs, truncation_psi=0.5, return_latents=False, training=None):
-        latents_p, latents_g, labels_in = inputs
-
-        w_latents_p = self.mapping([latents_p, labels_in])
-        w_latents_g = self.mapping([latents_g, labels_in])
-        
-        # don't change this block as we will always use StyleGAN2 in training=False anyway.
-        if training:
-            self.update_moving_average(w_latents)
-            w_latents = self.style_mixing_regularization(latents_in, labels_in, w_latents)
-        else:
-            w_latents_p = self.truncation_trick(w_latents_p, truncation_psi)
-            w_latents_g = self.truncation_trick(w_latents_g, truncation_psi)
-        
-        # TODO: Change input
-        images_out = self.synthesis_try_on([w_latents_p, w_latents_g])
-        if return_latents:
-            return images_out, w_latents_p, w_latents_g
-        return images_out
+    # @tf.function
+    # def try_on(self, inputs, truncation_psi=0.5, return_latents=False, training=None):
+    #     latents_p, latents_g, labels_in = inputs
+    #
+    #     w_latents_p = self.mapping([latents_p, labels_in])
+    #     w_latents_g = self.mapping([latents_g, labels_in])
+    #
+    #     # don't change this block as we will always use StyleGAN2 in training=False anyway.
+    #     if training:
+    #         self.update_moving_average(w_latents)
+    #         w_latents = self.style_mixing_regularization(latents_in, labels_in, w_latents)
+    #     else:
+    #         w_latents_p = self.truncation_trick(w_latents_p, truncation_psi)
+    #         w_latents_g = self.truncation_trick(w_latents_g, truncation_psi)
+    #
+    #     # TODO: Change input
+    #     images_out = self.synthesis_try_on([w_latents_p, w_latents_g])
+    #     if return_latents:
+    #         return images_out, w_latents_p, w_latents_g
+    #     return images_out

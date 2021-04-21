@@ -49,7 +49,8 @@ class modulated_conv2d(tf.keras.layers.Layer):
         self.p = self.add_weight(name='p',
                                  shape=(x_shape[-1]),
                                  dtype=tf.float32,
-                                 initializer='random_normal',
+                                 # TODO: Fix initializer
+                                 initializer=tf.zeros_initializer(),
                                  trainable=True)
         
     def call(self, inputs, training=None):
@@ -98,59 +99,59 @@ class modulated_conv2d(tf.keras.layers.Layer):
 
         return x 
 
-#    def try_on(self, inputs, training=None):
-#        x, w_latents_p, w_latents_g = inputs
+    def try_on(self, inputs, training=None):
+        x, w_latents_p, w_latents_g = inputs
         
         # TODO: Probably need to batch like w_latents_p
         # get Q
-#        q = tf.keras.activations.sigmoid(self.p)
-#        Q = tf.linalg.diag(q)
+        q = tf.keras.activations.sigmoid(self.p)
+        Q = tf.linalg.diag(q)
         
         # get sigmas
-#        sigma_p = self.fully_connected(w_latents_p) + 1
-#        sigma_g = self.fully_connected(w_latents_g) + 1
+        sigma_p = self.fully_connected(w_latents_p) + 1
+        sigma_g = self.fully_connected(w_latents_g) + 1
         
         # Linear interpolation
-#        s = sigma_p + tf.linalg.matmul(Q, sigma_g - sigma_p)
+        s = sigma_p + tf.linalg.matmul(Q, sigma_g - sigma_p)
         
         # Transform to channel first.
-#        x = tf.transpose(x, [0, 3, 1, 2])
+        x = tf.transpose(x, [0, 3, 1, 2])
 
         # Equalized learning rate and custom learning rate multiplier.
-#        w = self.w * self.runtime_coef
-#        ww = w[tf.newaxis] # [BkkIO] Introduce minibatch dimension.
+        w = self.w * self.runtime_coef
+        ww = w[tf.newaxis] # [BkkIO] Introduce minibatch dimension.
 
-#        ww *= tf.cast(s[:, tf.newaxis, tf.newaxis, :, tf.newaxis], w.dtype) # [BkkIO] Scale input feature maps.
+        ww *= tf.cast(s[:, tf.newaxis, tf.newaxis, :, tf.newaxis], w.dtype) # [BkkIO] Scale input feature maps.
 
         # Demodulate.
-#        if self.demodulate:
-#            d = tf.math.rsqrt(tf.reduce_sum(tf.square(ww), axis=[1,2,3]) + 1e-8) # [BO] Scaling factor.
-#            ww *= d[:, tf.newaxis, tf.newaxis, tf.newaxis, :] # [BkkIO] Scale output feature maps.
+        if self.demodulate:
+            d = tf.math.rsqrt(tf.reduce_sum(tf.square(ww), axis=[1,2,3]) + 1e-8) # [BO] Scaling factor.
+            ww *= d[:, tf.newaxis, tf.newaxis, tf.newaxis, :] # [BkkIO] Scale output feature maps.
 
         # Reshape/scale input.
-#        if self.fused_modconv:
-#            x = tf.reshape(x, [1, -1, x.shape[2], x.shape[3]]) # Fused => reshape minibatch to convolution groups.
-#            w = tf.reshape(tf.transpose(ww, [1, 2, 3, 0, 4]), [ww.shape[1], ww.shape[2], ww.shape[3], -1])
-#        else:
-#            x *= tf.cast(s[:, :, tf.newaxis, tf.newaxis], x.dtype) # [BIhw] Not fused => scale input activations.
+        if self.fused_modconv:
+            x = tf.reshape(x, [1, -1, x.shape[2], x.shape[3]]) # Fused => reshape minibatch to convolution groups.
+            w = tf.reshape(tf.transpose(ww, [1, 2, 3, 0, 4]), [ww.shape[1], ww.shape[2], ww.shape[3], -1])
+        else:
+            x *= tf.cast(s[:, :, tf.newaxis, tf.newaxis], x.dtype) # [BIhw] Not fused => scale input activations.
 
         # Convolution with optional up/downsampling.
-#        if self.up:
-#            x = upsample_conv_2d(x, tf.cast(w, x.dtype), data_format='NCHW', k=[1,3,3,1], impl=self.impl)
-#        else:
-#            x = tf.nn.conv2d(x, tf.cast(w, x.dtype), data_format='NCHW', strides=[1,1,1,1], padding='SAME')
+        if self.up:
+            x = upsample_conv_2d(x, tf.cast(w, x.dtype), data_format='NCHW', k=[1,3,3,1], impl=self.impl)
+        else:
+            x = tf.nn.conv2d(x, tf.cast(w, x.dtype), data_format='NCHW', strides=[1,1,1,1], padding='SAME')
 
         # Reshape/scale output.
-#        if self.fused_modconv:
-#            x = tf.reshape(x, [-1, self.filters, x.shape[2], x.shape[3]]) # Fused => reshape convolution groups back to minibatch.
-#        elif self.demodulate:
-#            x *= tf.cast(d[:, :, tf.newaxis, tf.newaxis], x.dtype) # [BOhw] Not fused => scale output activations.
+        if self.fused_modconv:
+            x = tf.reshape(x, [-1, self.filters, x.shape[2], x.shape[3]]) # Fused => reshape convolution groups back to minibatch.
+        elif self.demodulate:
+            x *= tf.cast(d[:, :, tf.newaxis, tf.newaxis], x.dtype) # [BOhw] Not fused => scale output activations.
 
         # Transform back to channel last
-#        x = tf.transpose(x, [0, 2, 3, 1])
+        x = tf.transpose(x, [0, 2, 3, 1])
 
-#        if self.apply_bias:
-#            b = self.b * self.lr_mul
-#            x = tf.nn.bias_add(x, b)
+        if self.apply_bias:
+            b = self.b * self.lr_mul
+            x = tf.nn.bias_add(x, b)
 
-#        return x 
+        return x 

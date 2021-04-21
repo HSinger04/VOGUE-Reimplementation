@@ -49,7 +49,7 @@ class modulated_conv2d(tf.keras.layers.Layer):
         self.p = self.add_weight(name='p',
                                  shape=(x_shape[-1]),
                                  dtype=tf.float32,
-                                 initializer=tf.random_normal_initializer(),
+                                 initializer=tf.random_uniform_initializer(0, init_std),
                                  trainable=True)
         
     def call(self, inputs, training=None):

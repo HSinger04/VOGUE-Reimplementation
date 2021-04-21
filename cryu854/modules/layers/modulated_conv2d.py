@@ -36,7 +36,7 @@ class modulated_conv2d(tf.keras.layers.Layer):
         self.w = self.add_weight(name='w',
                                  shape=weight_shape,
                                  dtype=tf.float32,
-                                 initializer=tf.random_normal_initializer(0, init_std),
+                                 initializer=tf.random_uniform_initializer(0, init_std),
                                  trainable=True)
         if self.apply_bias:
             self.b = self.add_weight(name='b',

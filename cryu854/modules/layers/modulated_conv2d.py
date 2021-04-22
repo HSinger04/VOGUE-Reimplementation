@@ -33,6 +33,16 @@ class modulated_conv2d(tf.keras.layers.Layer):
 
         self.fully_connected = fully_connected(units=x_shape[-1], apply_lrelu=False, name='modulate')
 
+        # Try-On
+        self.p = self.add_weight(name='p',
+                                 shape=(x_shape[-1]),
+                                 dtype=tf.float32,
+                                 # TODO: Fix initializer
+                                 initializer=tf.zeros_initializer(),
+                                 trainable=True)
+        # TODO: remove
+        print(self.p)
+        
         self.w = self.add_weight(name='w',
                                  shape=weight_shape,
                                  dtype=tf.float32,
@@ -45,13 +55,6 @@ class modulated_conv2d(tf.keras.layers.Layer):
                                      initializer=tf.zeros_initializer(),
                                      trainable=True)
         
-        # Try-On
-        self.p = self.add_weight(name='p',
-                                 shape=(x_shape[-1]),
-                                 dtype=tf.float32,
-                                 # TODO: Fix initializer
-                                 initializer=tf.zeros_initializer(),
-                                 trainable=True)
         
     def call(self, inputs, training=None):
         x, w_latents = inputs
@@ -101,9 +104,6 @@ class modulated_conv2d(tf.keras.layers.Layer):
 
     def try_on(self, inputs, training=None):
         x, w_latents_p, w_latents_g = inputs
-        
-        # TODO: remove
-        print(self.p)
         
         # TODO: Probably need to batch like w_latents_p
         # get Q

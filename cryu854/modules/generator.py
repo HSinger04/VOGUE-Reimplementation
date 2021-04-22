@@ -116,7 +116,7 @@ class generator(Model):
         self.layer_idx = tf.range(self.num_layers)[tf.newaxis, :, tf.newaxis]
         self.mapping = self.g_mapping(num_labels)
         self.synthesis = self.g_synthesis(randomize_noise, config, impl)
-        #self.synthesis_try_on = self.g_synthesis_try_on(randomize_noise, config, impl)
+        self.synthesis_try_on = self.g_synthesis_try_on(randomize_noise, config, impl)
         self.w_avg_beta = w_avg_beta
         self.style_mixing_prob = style_mixing_prob
         self.w_avg = tf.Variable(name='w_avg',
@@ -181,7 +181,7 @@ class generator(Model):
         return Model(inputs=[latents_in], outputs=[images_out], name=name)
 
     
-    def g_synthesis_try_on(self, randomize_noise, config, impl, name='g_synthesis'):
+    def g_synthesis_try_on(self, randomize_noise, config, impl, name='g_synthesis_try_on'): 
         """ Synthesis network with skip architecture. """
         filter_multiplier = 2 if config == 'f' else 1
         filters = {4: 512,
@@ -194,6 +194,11 @@ class generator(Model):
                    512: 32 * filter_multiplier,
                    1024: 16 * filter_multiplier
                   }
+        
+        
+        def get_syn_layer(name):
+            """ Get layer specified by name from self.synthesis """   
+            return self.synthesis.get_layer(name=name)
 
         latents_in = Input(shape=(self.num_layers, 512), name='latents_in')
         latents_g = Input(shape=(self.num_layers, 512), name='latents_g')
@@ -202,13 +207,13 @@ class generator(Model):
     
         # This part stays unchanged as constant doesn't depend on input
         constant = get_constant(name='constant')(w_latents_p)
-        x = gen_block(filters=512, randomize_noise=randomize_noise, impl=impl, name='4x4').try_on([constant, w_latents_p[:, 0], w_latents_g[:, 0]])
-        y = modulated_conv2d(filters=3, kernel_size=1, demodulate=False, impl=impl, name='4x4_ToRGB').try_on([x, w_latents_p[:, 1], w_latents_g[:, 1]])
+        x = get_syn_layer('4x4').try_on([constant, w_latents_p[:, 0], w_latents_g[:, 0]])
+        y = get_syn_layer('4x4_ToRGB').try_on([x, w_latents_p[:, 1], w_latents_g[:, 1]])
         for index, (res, fmaps) in enumerate(list(filters.items())[1:self.res_log2-1]):
-            x = gen_block(filters=fmaps, randomize_noise=randomize_noise, up=True, impl=impl, name=f'{res}x{res}_up').try_on([x, w_latents_p[:, index*2+1], w_latents_g[:, index*2+1]])
-            x = gen_block(filters=fmaps, randomize_noise=randomize_noise, impl=impl, name=f'{res}x{res}').try_on([x, w_latents_p[:, index*2+2], w_latents_g[:, index*2+2]])
-            y = Lambda(lambda x: upsample_2d(x, k=[1,3,3,1], data_format='NHWC', impl=impl), name=f'{res}x{res}_img_up')(y)
-            y += modulated_conv2d(filters=3, kernel_size=1, demodulate=False, impl=impl, name=f'{res}x{res}_ToRGB').try_on([x, w_latents_p[:, index*2+3], w_latents_g[:, index*2+3]])
+            x = get_syn_layer(f'{res}x{res}_up').try_on([x, w_latents_p[:, index*2+1], w_latents_g[:, index*2+1]])
+            x = get_syn_layer(f'{res}x{res}').try_on([x, w_latents_p[:, index*2+2], w_latents_g[:, index*2+2]])
+            y = get_syn_layer(f'{res}x{res}_img_up')(y)
+            y += get_syn_layer(f'{res}x{res}_ToRGB').try_on([x, w_latents_p[:, index*2+3], w_latents_g[:, index*2+3]])
              
         images_out = y
         

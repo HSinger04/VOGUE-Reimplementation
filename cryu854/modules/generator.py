@@ -116,7 +116,7 @@ class generator(Model):
         self.layer_idx = tf.range(self.num_layers)[tf.newaxis, :, tf.newaxis]
         self.mapping = self.g_mapping(num_labels)
         self.synthesis = self.g_synthesis(randomize_noise, config, impl)
-        self.synthesis_try_on = self.g_synthesis_try_on(randomize_noise, config, impl)
+        #self.synthesis_try_on = self.g_synthesis_try_on(randomize_noise, config, impl)
         self.w_avg_beta = w_avg_beta
         self.style_mixing_prob = style_mixing_prob
         self.w_avg = tf.Variable(name='w_avg',

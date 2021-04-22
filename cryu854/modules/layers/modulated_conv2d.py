@@ -102,6 +102,9 @@ class modulated_conv2d(tf.keras.layers.Layer):
     def try_on(self, inputs, training=None):
         x, w_latents_p, w_latents_g = inputs
         
+        # TODO: remove
+        print(self.p)
+        
         # TODO: Probably need to batch like w_latents_p
         # get Q
         q = tf.keras.activations.sigmoid(self.p)

@@ -53,6 +53,9 @@ class modulated_conv2d(tf.keras.layers.Layer):
                                      initializer=tf.zeros_initializer(),
                                      trainable=True)
         
+        # TODO: maybe remove?
+        self.built = True
+        
         
     def call(self, inputs, training=None):
         x, w_latents = inputs

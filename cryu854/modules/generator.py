@@ -181,7 +181,7 @@ class generator(Model):
         return Model(inputs=[latents_in], outputs=[images_out], name=name)
 
     
-    def g_synthesis_try_on(self, randomize_noise, config, impl, name='g_synthesis_try_on'):
+    def g_synthesis_try_on(self, randomize_noise, config, impl, name='g_synthesis'):
         """ Synthesis network with skip architecture. """
         filter_multiplier = 2 if config == 'f' else 1
         filters = {4: 512,

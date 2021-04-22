@@ -105,17 +105,20 @@ class modulated_conv2d(tf.keras.layers.Layer):
     def try_on(self, inputs, training=None):
         x, w_latents_p, w_latents_g = inputs
         
+        # TODO: remove
+        s = self.fully_connected(w_latents_p) + 1
+        
         # TODO: Probably need to batch like w_latents_p
         # get Q
-        q = tf.keras.activations.sigmoid(self.p)
-        Q = tf.linalg.diag(q)
+#        q = tf.keras.activations.sigmoid(self.p)
+#        Q = tf.linalg.diag(q)
         
         # get sigmas
-        sigma_p = self.fully_connected(w_latents_p) + 1
-        sigma_g = self.fully_connected(w_latents_g) + 1
+#        sigma_p = self.fully_connected(w_latents_p) + 1
+#        sigma_g = self.fully_connected(w_latents_g) + 1
         
         # Linear interpolation
-        s = sigma_p + tf.linalg.matmul(Q, sigma_g - sigma_p)
+#        s = sigma_p + tf.linalg.matmul(Q, sigma_g - sigma_p)
         
         # Transform to channel first.
         x = tf.transpose(x, [0, 3, 1, 2])

@@ -40,8 +40,6 @@ class modulated_conv2d(tf.keras.layers.Layer):
                                  # TODO: Fix initializer
                                  initializer=tf.zeros_initializer(),
                                  trainable=True)
-        # TODO: remove
-        print(self.built)
         
         self.w = self.add_weight(name='w',
                                  shape=weight_shape,
@@ -103,7 +101,11 @@ class modulated_conv2d(tf.keras.layers.Layer):
         return x 
 
     def try_on(self, inputs, training=None):
+        
         x, w_latents_p, w_latents_g = inputs
+        
+        if not self.built:
+            self.build([x.shape, w_latents_p.shape])
         
         # TODO: remove
         s = self.fully_connected(w_latents_p) + 1

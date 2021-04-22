@@ -41,7 +41,7 @@ class modulated_conv2d(tf.keras.layers.Layer):
                                  initializer=tf.zeros_initializer(),
                                  trainable=True)
         # TODO: remove
-        print(self.p)
+        print(self.built)
         
         self.w = self.add_weight(name='w',
                                  shape=weight_shape,

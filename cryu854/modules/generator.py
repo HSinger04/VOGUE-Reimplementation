@@ -163,7 +163,7 @@ class generator(Model):
         return Model(inputs=[latents_in, labels_in], outputs=[latents_out], name=name)
 
     
-    def get_syn_layer(name):
+    def get_syn_layer(self, name):
         """ Get layer specified by name from self.synthesis """   
         return self.synthesis.get_layer(name=name)
     

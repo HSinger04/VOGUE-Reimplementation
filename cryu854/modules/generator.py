@@ -205,13 +205,13 @@ class generator(Model):
     
         # This part stays unchanged as constant doesn't depend on input
         constant = get_constant(name='constant')(w_latents_p)
-        x = get_syn_layer('4x4').try_on([constant, w_latents_p[:, 0], w_latents_g[:, 0]])
-        y = get_syn_layer('4x4_ToRGB').try_on([x, w_latents_p[:, 1], w_latents_g[:, 1]])
+        x = self.get_syn_layer('4x4').try_on([constant, w_latents_p[:, 0], w_latents_g[:, 0]])
+        y = self.get_syn_layer('4x4_ToRGB').try_on([x, w_latents_p[:, 1], w_latents_g[:, 1]])
         for index, (res, fmaps) in enumerate(list(self.filters_try_on.items())[1:self.res_log2-1]):
-            x = get_syn_layer(f'{res}x{res}_up').try_on([x, w_latents_p[:, index*2+1], w_latents_g[:, index*2+1]])
-            x = get_syn_layer(f'{res}x{res}').try_on([x, w_latents_p[:, index*2+2], w_latents_g[:, index*2+2]])
-            y = get_syn_layer(f'{res}x{res}_img_up')(y)
-            y += get_syn_layer(f'{res}x{res}_ToRGB').try_on([x, w_latents_p[:, index*2+3], w_latents_g[:, index*2+3]])
+            x = self.get_syn_layer(f'{res}x{res}_up').try_on([x, w_latents_p[:, index*2+1], w_latents_g[:, index*2+1]])
+            x = self.get_syn_layer(f'{res}x{res}').try_on([x, w_latents_p[:, index*2+2], w_latents_g[:, index*2+2]])
+            y = self.get_syn_layer(f'{res}x{res}_img_up')(y)
+            y += self.get_syn_layer(f'{res}x{res}_ToRGB').try_on([x, w_latents_p[:, index*2+3], w_latents_g[:, index*2+3]])
              
         images_out = y
         

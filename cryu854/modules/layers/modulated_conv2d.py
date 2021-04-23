@@ -118,7 +118,7 @@ class modulated_conv2d(tf.keras.layers.Layer):
         sigma_g = self.fully_connected(w_latents_g) + 1
         
         # Linear interpolation
-        s = sigma_p + tf.map_fn(lambda a: tf.linalg.matmul(Q, a), sigma_g - sigma_p)
+        s = sigma_p + tf.map_fn(lambda a: tf.linalg.matvec(Q, a), sigma_g - sigma_p)
         
         # Transform to channel first.
         x = tf.transpose(x, [0, 3, 1, 2])

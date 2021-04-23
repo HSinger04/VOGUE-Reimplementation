@@ -204,7 +204,7 @@ class generator(Model):
         w_latents_p, w_latents_g = inputs
     
         # This part stays unchanged as constant doesn't depend on input
-        constant = get_constant(name='constant')(w_latents_p)
+        constant = self.get_syn_layer('constant')(w_latents_p)
         x = self.get_syn_layer('4x4').try_on([constant, w_latents_p[:, 0], w_latents_g[:, 0]])
         y = self.get_syn_layer('4x4_ToRGB').try_on([x, w_latents_p[:, 1], w_latents_g[:, 1]])
         for index, (res, fmaps) in enumerate(list(self.filters_try_on.items())[1:self.res_log2-1]):

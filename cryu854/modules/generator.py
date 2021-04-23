@@ -116,7 +116,20 @@ class generator(Model):
         self.layer_idx = tf.range(self.num_layers)[tf.newaxis, :, tf.newaxis]
         self.mapping = self.g_mapping(num_labels)
         self.synthesis = self.g_synthesis(randomize_noise, config, impl)
-        self.synthesis_try_on = self.g_synthesis_try_on(randomize_noise, config, impl)
+        
+        # Try_on relevant block
+        filter_multiplier = 2 if config == 'f' else 1
+        self.filters_try_on = {4: 512,
+                   8: 512,
+                   16: 512,
+                   32: 512,
+                   64: 256 * filter_multiplier,
+                   128: 128 * filter_multiplier,
+                   256: 64 * filter_multiplier,
+                   512: 32 * filter_multiplier,
+                   1024: 16 * filter_multiplier
+                  }
+
         self.w_avg_beta = w_avg_beta
         self.style_mixing_prob = style_mixing_prob
         self.w_avg = tf.Variable(name='w_avg',
@@ -149,7 +162,12 @@ class generator(Model):
         latents_out = broadcasted_latents
         return Model(inputs=[latents_in, labels_in], outputs=[latents_out], name=name)
 
-
+    
+    def get_syn_layer(name):
+        """ Get layer specified by name from self.synthesis """   
+        return self.synthesis.get_layer(name=name)
+    
+    
     def g_synthesis(self, randomize_noise, config, impl, name='g_synthesis'):
         """ Synthesis network with skip architecture. """
         filter_multiplier = 2 if config == 'f' else 1
@@ -181,35 +199,15 @@ class generator(Model):
         return Model(inputs=[latents_in], outputs=[images_out], name=name)
 
     
-    def g_synthesis_try_on(self, randomize_noise, config, impl, name='g_synthesis_try_on'): 
+    def g_synthesis_try_on(self, inputs): 
         """ Synthesis network with skip architecture. """
-        filter_multiplier = 2 if config == 'f' else 1
-        filters = {4: 512,
-                   8: 512,
-                   16: 512,
-                   32: 512,
-                   64: 256 * filter_multiplier,
-                   128: 128 * filter_multiplier,
-                   256: 64 * filter_multiplier,
-                   512: 32 * filter_multiplier,
-                   1024: 16 * filter_multiplier
-                  }
-        
-        
-        def get_syn_layer(name):
-            """ Get layer specified by name from self.synthesis """   
-            return self.synthesis.get_layer(name=name)
-
-        latents_in = Input(shape=(self.num_layers, 512), name='latents_in')
-        latents_g = Input(shape=(self.num_layers, 512), name='latents_g')
-        w_latents_p = latents_in
-        w_latents_g = latents_g
+        w_latents_p, w_latents_g = inputs
     
         # This part stays unchanged as constant doesn't depend on input
         constant = get_constant(name='constant')(w_latents_p)
         x = get_syn_layer('4x4').try_on([constant, w_latents_p[:, 0], w_latents_g[:, 0]])
         y = get_syn_layer('4x4_ToRGB').try_on([x, w_latents_p[:, 1], w_latents_g[:, 1]])
-        for index, (res, fmaps) in enumerate(list(filters.items())[1:self.res_log2-1]):
+        for index, (res, fmaps) in enumerate(list(self.filters_try_on.items())[1:self.res_log2-1]):
             x = get_syn_layer(f'{res}x{res}_up').try_on([x, w_latents_p[:, index*2+1], w_latents_g[:, index*2+1]])
             x = get_syn_layer(f'{res}x{res}').try_on([x, w_latents_p[:, index*2+2], w_latents_g[:, index*2+2]])
             y = get_syn_layer(f'{res}x{res}_img_up')(y)
@@ -217,7 +215,7 @@ class generator(Model):
              
         images_out = y
         
-        return Model(inputs=[latents_in, latents_g], outputs=[images_out], name=name)
+        return images_out
 
 
     def setup_as_moving_average_of(self, src_net, beta=0.99, beta_nontrainable=0.0):
@@ -286,7 +284,7 @@ class generator(Model):
             w_latents_g = self.truncation_trick(w_latents_g, truncation_psi)
         
         # TODO: Change input
-        images_out = self.synthesis_try_on([w_latents_p, w_latents_g])
+        images_out = self.g_synthesis_try_on([w_latents_p, w_latents_g])
         if return_latents:
             return images_out, w_latents_p, w_latents_g
         return images_out

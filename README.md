@@ -20,3 +20,7 @@ Contains the source papers which were relevant for this project.
 ## cryu854
 
 Contains the actual, interesting code part. Especially Image2Latent.ipynb and TryOn.ipynb.
+
+## VOGUE___IANNwTF.pdf
+
+Contains the paper for the project.
